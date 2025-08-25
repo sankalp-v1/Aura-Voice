@@ -1,0 +1,3 @@
+[submodule "TTS-Engine"]
+	path = TTS-Engine
+	url = https://github.com/sankalp-v1/TTS-Engine.git
