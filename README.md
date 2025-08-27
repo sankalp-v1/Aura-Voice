@@ -1,6 +1,8 @@
 <p align="center">
   <h1>Aura Voice 🗣️✨ - Your AI Co-Pilot for Conversations</h1>
-  <a href="https://ibb.co/23drYP3g"><img src="https://i.ibb.co/b5XVRL5z/qwen-image-edit-Edit-the-existing-i.png" alt="Aura Voice Logo" width="500"></a>
+  <a href="https://github.com/sankalp-v1/Aura-Voice/blob/main/Images/qwen-image-edit__Edit_the_existing_i.png">
+    <img src="https://raw.githubusercontent.com/sankalp-v1/Aura-Voice/main/Images/qwen-image-edit__Edit_the_existing_i.png" alt="Aura Voice Logo" width="500">
+  </a>
 </p>
 
 ---
