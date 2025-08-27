@@ -1,0 +1,19 @@
+# Core App & Brain
+streamlit
+streamlit-webrtc
+openai
+pydub
+
+# TTS-Engine Dependencies
+requests
+pygame
+aiohttp
+aiofiles
+python-dotenv
+edge-tts
+
+# VibeVoice & STT Dependencies
+vosk
+openai-whisper
+# The following line tells pip to install the VibeVoice folder as a package
+-e ./VibeVoice

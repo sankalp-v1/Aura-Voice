@@ -32,6 +32,7 @@ PROVIDER_CLASS_MAP = {
     "speechify": "SpeechifyTTSProvider",
     "tiktok_tts": "TikTokTTSProvider",
     "hearling": "HearlingTTSProvider",
+    "vibevoice": "VibeVoiceProvider",
 }
 
 # --- MODEL LOADING (Done only once) ---
