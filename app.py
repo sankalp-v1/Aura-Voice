@@ -85,7 +85,7 @@ class AudioProcessor(AudioProcessorBase):
 # --- STREAMLIT UI ---
 webrtc_ctx = webrtc_streamer(
     key="speech-to-text",
-    mode=WebRtcMode.SEND_ONLY,
+    mode=WebRtcMode.SENDONLY,
     audio_processor_factory=AudioProcessor,
     media_stream_constraints={"video": False, "audio": True},
 )
