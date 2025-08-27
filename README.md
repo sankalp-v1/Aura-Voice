@@ -1,8 +1,8 @@
 <p align="center">
   <h1>Aura Voice 🗣️✨ - Your AI Co-Pilot for Conversations</h1>
-  ---
-  
-  <a href="https://postimg.cc/mtb6xWQQ"><img src="https://i.postimg.cc/mtb6xWQQ/Untitled-design.png" alt="Aura Voice Logo" width="500"></a>
+  <a href="https://freeimage.host/i/K2auZAu">
+    <img src="https://iili.io/K2auZAu.png" alt="Aura Voice Logo" width="500">
+  </a>
 </p>
 
 ---
