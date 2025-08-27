@@ -1,6 +1,6 @@
 <p align="center">
   <h1>Aura Voice 🗣️✨ - Your AI Co-Pilot for Conversations</h1>
-  <a href="https://ibb.co/Lzwvn7Zs"><img src="https://i.ibb.co/xSv3JT7r/20250824-133746-0000.png" alt="Aura-Voice Logo" width="500"></a>
+  <a href="https://ibb.co/23drYP3g"><img src="https://i.ibb.co/b5XVRL5z/qwen-image-edit-Edit-the-existing-i.png" alt="Aura Voice Logo" width="500"></a>
 </p>
 
 ---
