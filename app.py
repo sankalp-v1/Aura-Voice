@@ -1,30 +1,23 @@
-import streamlit as st
 import os
 import sys
-import asyncio
-import traceback
-import numpy as np
-from openai import OpenAI
-from pydub import AudioSegment
-import av
-import vosk
 import whisper
-import json
+import numpy as np
+import sounddevice as sd
+import soundfile as sf
+from openai import OpenAI
 import importlib
-from streamlit_webrtc import webrtc_streamer, WebRtcMode, AudioProcessorBase
+import warnings
 
 # --- PATH SETUP ---
 # This adds the TTS-Engine folder to our Python path
 engine_path = os.path.join(os.getcwd(), 'TTS-Engine')
 sys.path.append(engine_path)
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="Aura Voice Demo", page_icon="🗣️")
-st.title("🗣️ Aura Voice Live Demo")
-
 # --- CONFIGURATION ---
-STT_PROVIDER_TO_USE = "whisper"  # Change this to "vosk" or "whisper"
-TTS_PROVIDER_TO_USE = "tiktok_tts" # Change the default voice here
+TTS_PROVIDER_TO_USE = "tiktok_tts"  # Change the default voice here
+MODEL_SIZE = "base"  # Whisper model size (e.g., "tiny", "base", "small", "medium")
+SAMPLE_RATE = 16000  # Audio sample rate
+CHANNELS = 1  # Mono audio
 
 # A mapping of the provider filename to the class name inside that file
 PROVIDER_CLASS_MAP = {
@@ -35,99 +28,110 @@ PROVIDER_CLASS_MAP = {
     "vibevoice": "VibeVoiceProvider",
 }
 
-# --- MODEL LOADING (Done only once) ---
-@st.cache_resource
-def load_models():
-    vosk_model = None
-    if os.path.exists(os.path.join(engine_path, "voice/voices/assets/models/vosk/vosk-model-small-en-us-0.15")):
-        vosk_model = vosk.Model(os.path.join(engine_path, "voice/voices/assets/models/vosk/vosk-model-small-en-us-0.15"))
-    
-    whisper_model = whisper.load_model("base")
-    return vosk_model, whisper_model
+# --- MODEL LOADING ---
+print("🔥 Loading AI models... (This might take a sec)")
+# Suppress a specific, non-critical warning from Whisper
+warnings.filterwarnings("ignore", category=UserWarning, module='whisper.transcribing', lineno=114)
+whisper_model = whisper.load_model(MODEL_SIZE)
+print("✅ AI models loaded!")
 
-with st.spinner("Loading AI models... (This can take a moment on first run)"):
-    vosk_model, whisper_model = load_models()
-st.success("AI models loaded!")
+# --- MAIN CHAT LOGIC ---
+def main():
+    """
+    Main function to run the real-time voice chat loop in the terminal.
+    """
+    print("\n🚀 Aura Voice is ready. Press Enter to start speaking, and Enter again when you're done.")
+    while True:
+        # Wait for user to press Enter to start recording
+        input("Press Enter to start recording...")
+        print("🎤 Recording... Press Enter again to stop.")
 
-# --- SESSION STATE ---
-if "text" not in st.session_state:
-    st.session_state.text = "Click 'Start' to speak, then 'Stop' when you're done."
+        recorded_frames = []
 
-# --- AUDIO PROCESSING CLASS ---
-class AudioProcessor(AudioProcessorBase):
-    def __init__(self):
-        self.audio_buffer = np.array([], dtype=np.int16)
+        # This callback function is called for each chunk of audio
+        def audio_callback(indata, frames, time, status):
+            if status:
+                print(status, file=sys.stderr)
+            recorded_frames.append(indata.copy())
 
-    def recv(self, frame: av.AudioFrame) -> av.AudioFrame:
-        audio_data = frame.to_ndarray(format='s16')
-        self.audio_buffer = np.append(self.audio_buffer, audio_data)
-        return frame
+        # Start recording in a non-blocking stream
+        with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype='float32', callback=audio_callback):
+            # Wait for user to press Enter again to stop the recording
+            input()
 
-    def on_ended(self):
-        st.session_state.text = "🎤 Processing audio..."
-        
-        if self.audio_buffer.size == 0:
-            st.session_state.text = "No audio received. Please try again."
-            return
+        print("✅ Recording finished.")
 
-        if STT_PROVIDER_TO_USE == "whisper" and whisper_model:
-            result = whisper_model.transcribe(self.audio_buffer, fp16=False)
-            st.session_state.text = result["text"]
-        elif STT_PROVIDER_TO_USE == "vosk" and vosk_model:
-            rec = vosk.KaldiRecognizer(vosk_model, 16000)
-            rec.AcceptWaveform(self.audio_buffer.tobytes())
-            result = json.loads(rec.FinalResult())
-            st.session_state.text = result["text"]
-        else:
-            st.session_state.text = f"Error: {STT_PROVIDER_TO_USE} model not loaded."
-        
-        self.audio_buffer = np.array([], dtype=np.int16) # Clear buffer
+        if not recorded_frames:
+            print("No audio recorded. Try again.")
+            continue
 
-# --- STREAMLIT UI ---
-webrtc_ctx = webrtc_streamer(
-    key="speech-to-text",
-    mode=WebRtcMode.SENDONLY,
-    audio_processor_factory=AudioProcessor,
-    media_stream_constraints={"video": False, "audio": True},
-)
+        # Convert the list of recorded frames into a single NumPy array
+        audio_data = np.concatenate(recorded_frames, axis=0)
+        audio_filepath = "temp_recording.wav"
 
-st.write("---")
+        # Save the recorded audio to a temporary file
+        sf.write(audio_filepath, audio_data, SAMPLE_RATE)
 
-if st.session_state.text and "Click 'Start'" not in st.session_state.text and "Processing" not in st.session_state.text:
-    st.subheader("👂 You Said:")
-    st.write(st.session_state.text)
-    
-    with st.spinner("🧠 Accessing the Brain..."):
+        # --- Speech-to-Text (using Whisper) ---
+        print("🤫 Transcribing audio...")
+        result = whisper_model.transcribe(audio_filepath, fp16=False)
+        user_text = result["text"].strip()
+        print(f"👂 You said: {user_text}")
+
+        # If transcription is empty, skip to the next loop
+        if not user_text:
+            print("No speech detected. Try again.")
+            os.remove(audio_filepath) # Clean up the temp file
+            continue
+
+        # --- Brain Logic (using GitHub/OpenAI) ---
+        print("🧠 Accessing the Brain...")
         try:
             token = os.environ.get("GITHUB_TOKEN") or os.environ.get("API_TOKEN")
+            if not token:
+                print("💀 Error: GITHUB_TOKEN or API_TOKEN not found in environment variables.")
+                continue
+
             endpoint = "https://models.github.ai/inference"
             model_name = "openai/gpt-4o"
             client = OpenAI(base_url=endpoint, api_key=token)
-            
+
             response = client.chat.completions.create(
-                messages=[{"role": "user", "content": st.session_state.text}], model=model_name
+                messages=[{"role": "user", "content": user_text}], model=model_name
             )
             ai_response_text = response.choices[0].message.content
+            print(f"🤖 AI responded: {ai_response_text}")
 
-            st.subheader("🤖 AI Responded:")
-            st.write(ai_response_text)
-            
-            with st.spinner("🗣️ Accessing the Voice..."):
-                try:
-                    # Dynamically import the correct provider module
-                    provider_module = importlib.import_module(f"voice.text_to_speech.providers.{TTS_PROVIDER_TO_USE}")
-                    ProviderClass = getattr(provider_module, PROVIDER_CLASS_MAP[TTS_PROVIDER_TO_USE])
-                    active_provider = ProviderClass()
-                    
-                    audio_path = active_provider.generate_speech(ai_response_text)
-                    st.audio(audio_path, autoplay=True)
-                except Exception as e:
-                    st.error(f"Voice Error: {e}")
+            # --- Text-to-Speech (using TTS-Engine) ---
+            print("🗣️ Accessing the Voice...")
+            try:
+                # Dynamically import the correct TTS provider
+                provider_module = importlib.import_module(f"voice.text_to_speech.providers.{TTS_PROVIDER_TO_USE}")
+                ProviderClass = getattr(provider_module, PROVIDER_CLASS_MAP[TTS_PROVIDER_TO_USE])
+                active_provider = ProviderClass()
+
+                # Generate the speech and get the file path
+                audio_path = active_provider.generate_speech(ai_response_text)
+                
+                # Play the generated audio
+                data, fs = sf.read(audio_path, dtype='float32')
+                sd.play(data, fs)
+                sd.wait()  # Wait until the audio is done playing
+
+            except Exception as e:
+                print(f"💀 Voice Error: {e}")
+
         except Exception as e:
-            st.error(f"Brain Error: {e}")
+            print(f"💀 Brain Error: {e}")
 
-    # Clear state for next turn
-    st.session_state.text = "Click 'Start' to speak, then 'Stop' when you're done."
+        # Clean up the temporary recording file
+        os.remove(audio_filepath)
+        print("\n-----------------------------------\n")
 
-else:
-    st.info(st.session_state.text)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nExiting Aura Voice. Peace out! ✌️")
+        sys.exit(0)

@@ -1,8 +1,8 @@
 # Core App & Brain
-streamlit
-streamlit-webrtc
 openai
 pydub
+sounddevice
+soundfile
 
 # TTS-Engine Dependencies
 requests
