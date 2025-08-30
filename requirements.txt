@@ -15,5 +15,3 @@ edge-tts
 # VibeVoice & STT Dependencies
 vosk
 openai-whisper
-# The following line tells pip to install the VibeVoice folder as a package
--e ./VibeVoice

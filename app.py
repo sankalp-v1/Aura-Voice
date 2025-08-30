@@ -9,54 +9,46 @@ import importlib
 import warnings
 
 # --- PATH SETUP ---
-# This adds the TTS-Engine folder to our Python path
+# This adds the TTS-Engine folder to our Python path, allowing us to import from it
 engine_path = os.path.join(os.getcwd(), 'TTS-Engine')
 sys.path.append(engine_path)
 
 # --- CONFIGURATION ---
-TTS_PROVIDER_TO_USE = "tiktok_tts"  # Change the default voice here
-MODEL_SIZE = "base"  # Whisper model size (e.g., "tiny", "base", "small", "medium")
-SAMPLE_RATE = 16000  # Audio sample rate
-CHANNELS = 1  # Mono audio
+TTS_PROVIDER_TO_USE = "vibevoice"  # Now you can set "vibevoice" as a provider
+MODEL_SIZE = "base"
+SAMPLE_RATE = 16000
+CHANNELS = 1
 
-# A mapping of the provider filename to the class name inside that file
+# A mapping of the provider folder name to the class name inside that provider's code
 PROVIDER_CLASS_MAP = {
     "edge_tts": "EdgeTTSProvider",
     "speechify": "SpeechifyTTSProvider",
     "tiktok_tts": "TikTokTTSProvider",
     "hearling": "HearlingTTSProvider",
-    "vibevoice": "VibeVoiceProvider",
+    "vibevoice": "VibeVoiceProvider", # VibeVoice is now a standard provider
 }
 
 # --- MODEL LOADING ---
-print("🔥 Loading AI models... (This might take a sec)")
-# Suppress a specific, non-critical warning from Whisper
+print("🔥 Loading AI models...")
 warnings.filterwarnings("ignore", category=UserWarning, module='whisper.transcribing', lineno=114)
 whisper_model = whisper.load_model(MODEL_SIZE)
 print("✅ AI models loaded!")
 
 # --- MAIN CHAT LOGIC ---
 def main():
-    """
-    Main function to run the real-time voice chat loop in the terminal.
-    """
     print("\n🚀 Aura Voice is ready. Press Enter to start speaking, and Enter again when you're done.")
     while True:
-        # Wait for user to press Enter to start recording
         input("Press Enter to start recording...")
         print("🎤 Recording... Press Enter again to stop.")
 
         recorded_frames = []
 
-        # This callback function is called for each chunk of audio
         def audio_callback(indata, frames, time, status):
             if status:
                 print(status, file=sys.stderr)
             recorded_frames.append(indata.copy())
 
-        # Start recording in a non-blocking stream
         with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype='float32', callback=audio_callback):
-            # Wait for user to press Enter again to stop the recording
             input()
 
         print("✅ Recording finished.")
@@ -65,26 +57,20 @@ def main():
             print("No audio recorded. Try again.")
             continue
 
-        # Convert the list of recorded frames into a single NumPy array
         audio_data = np.concatenate(recorded_frames, axis=0)
         audio_filepath = "temp_recording.wav"
-
-        # Save the recorded audio to a temporary file
         sf.write(audio_filepath, audio_data, SAMPLE_RATE)
 
-        # --- Speech-to-Text (using Whisper) ---
         print("🤫 Transcribing audio...")
         result = whisper_model.transcribe(audio_filepath, fp16=False)
         user_text = result["text"].strip()
         print(f"👂 You said: {user_text}")
 
-        # If transcription is empty, skip to the next loop
         if not user_text:
             print("No speech detected. Try again.")
-            os.remove(audio_filepath) # Clean up the temp file
+            os.remove(audio_filepath)
             continue
 
-        # --- Brain Logic (using GitHub/OpenAI) ---
         print("🧠 Accessing the Brain...")
         try:
             token = os.environ.get("GITHUB_TOKEN") or os.environ.get("API_TOKEN")
@@ -102,21 +88,17 @@ def main():
             ai_response_text = response.choices[0].message.content
             print(f"🤖 AI responded: {ai_response_text}")
 
-            # --- Text-to-Speech (using TTS-Engine) ---
             print("🗣️ Accessing the Voice...")
             try:
-                # Dynamically import the correct TTS provider
+                # This dynamic import will now find 'vibevoice' inside the TTS-Engine providers folder
                 provider_module = importlib.import_module(f"voice.text_to_speech.providers.{TTS_PROVIDER_TO_USE}")
                 ProviderClass = getattr(provider_module, PROVIDER_CLASS_MAP[TTS_PROVIDER_TO_USE])
                 active_provider = ProviderClass()
 
-                # Generate the speech and get the file path
                 audio_path = active_provider.generate_speech(ai_response_text)
-                
-                # Play the generated audio
                 data, fs = sf.read(audio_path, dtype='float32')
                 sd.play(data, fs)
-                sd.wait()  # Wait until the audio is done playing
+                sd.wait()
 
             except Exception as e:
                 print(f"💀 Voice Error: {e}")
@@ -124,7 +106,6 @@ def main():
         except Exception as e:
             print(f"💀 Brain Error: {e}")
 
-        # Clean up the temporary recording file
         os.remove(audio_filepath)
         print("\n-----------------------------------\n")
 
