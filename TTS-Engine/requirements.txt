@@ -1,5 +1,0 @@
-requests
-pygame
-aiohttp
-aiofiles
-python-dotenv
