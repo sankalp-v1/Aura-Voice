@@ -3,6 +3,7 @@ openai
 pydub
 sounddevice
 soundfile
+numpy
 
 # TTS-Engine Dependencies
 requests
@@ -14,4 +15,4 @@ edge-tts
 
 # VibeVoice & STT Dependencies
 vosk
-openai-whisper
+git+https://github.com/openai/whisper.git
