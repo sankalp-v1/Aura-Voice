@@ -14,7 +14,7 @@ engine_path = os.path.join(os.getcwd(), 'TTS-Engine')
 sys.path.append(engine_path)
 
 # --- CONFIGURATION ---
-TTS_PROVIDER_TO_USE = "edge_tts"  # Now you can set "tiktok_tts" as a provider
+TTS_PROVIDER_TO_USE = "edge_tts"  # Now you can set "edge_tts" as a provider
 MODEL_SIZE = "base"
 SAMPLE_RATE = 16000
 CHANNELS = 1
