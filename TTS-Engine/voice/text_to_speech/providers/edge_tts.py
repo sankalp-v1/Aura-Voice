@@ -1,4 +1,5 @@
 import os
+import re
 from core.logger import get_logger
 from voice.text_to_speech.base import BaseTTSProvider
 from typing import Optional, Dict, Any
@@ -62,8 +63,14 @@ class EdgeTTSProvider(BaseTTSProvider):
         """
         voice = voice if (voice and voice in self.VOICE_OPTIONS) else self.default_voice
         
-        # Create output file in cache directory
-        output_file = os.path.join(self.cache_dir, f"{voice}.mp3") if not output_path else output_path
+        # --- THIS IS THE FIX ---
+        # Create a unique and safe filename from the first 5 words of the text
+        # This prevents the app from playing old, cached audio files.
+        first_five_words = "".join(text.split()[:5])
+        safe_filename = re.sub(r'[^a-zA-Z0-9]', '', first_five_words)
+        
+        # Use the provided output_path or create a unique one in the cache
+        output_file = output_path if output_path else os.path.join(self.cache_dir, f"{safe_filename}.mp3")
         
         # Create a simple command just like the sample code
         command = f'edge-tts --voice "{voice}" --text "{text}" --write-media "{output_file}" --write-subtitles "{self.subtitle_file}"'
