@@ -78,6 +78,32 @@ Keep your secrets safe\! Store these in your GitHub Codespaces Secrets (the 🔒
 
 Call your shiny new Twilio number from your real phone\! Your `server.py` script will answer, and you'll be chatting with your very own AI co-pilot. Experience the future\!
 
+---
+## Setup (recommended)
+
+There's a helper script to create a reproducible environment using pyenv + Python 3.11 and install all dependencies (including torch).
+
+Run from the repo root (zsh):
+
+```bash
+./scripts/setup_env.sh
+source .venv/bin/activate
+```
+
+If you prefer not to use pyenv, create a Python 3.11 venv and run:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+```
+
+Troubleshooting notes:
+- If installation fails on `torch`, use the appropriate wheel from https://pytorch.org/get-started/locally/ (select macOS/CPU or macOS/MPS).
+- If pip refuses to install system-wide packages, you're on an "externally-managed" Python (Homebrew). Use the script above to create and activate a venv.
+- If `whisper` fails to build from source, try installing `torch` first as per the PyTorch instructions.
+
 -----
 
 ## Wanna Level Up? Contribute\! 🚀
@@ -89,6 +115,3 @@ Got fresh ideas? Spotted a glitch in the matrix? Pull requests are always welcom
 ## Big Ups\! 🙏
 
 Huge props to the brilliant minds behind [Jarvis 4.0](https://github.com/SreejanPersonal/Jarvis-4.0)\! Their incredible `TTS-Engine` code is the beating heart of Aura Voice's custom sound. You guys rock\!
-
-```
-```
