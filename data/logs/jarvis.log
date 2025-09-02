@@ -1,3 +1,7 @@
 2025-09-02 14:36:41,831 - voice.text_to_speech.providers.tiktok_tts - INFO - Initialized tiktokAPITTSProvider using variant 'gesserit' with default voice: en_us_rocket
 2025-09-02 14:36:48,236 - voice.text_to_speech.providers.tiktok_tts - ERROR - Request to https://gesserit.co/api/tiktok-tts failed: 500 Server Error: Internal Server Error for url: https://gesserit.co/api/tiktok-tts
 2025-09-02 14:40:49,607 - httpx - INFO - HTTP Request: POST https://models.github.ai/inference/chat/completions "HTTP/1.1 200 OK"
+2025-09-02 21:12:10,430 - voice.text_to_speech.providers.tiktok_tts - INFO - Initialized tiktokAPITTSProvider using variant 'gesserit' with default voice: en_us_rocket
+2025-09-02 21:12:31,251 - httpx - INFO - HTTP Request: POST https://models.github.ai/inference/chat/completions "HTTP/1.1 200 OK"
+2025-09-02 21:12:31,253 - voice.text_to_speech.providers.tiktok_tts - INFO - Initialized tiktokAPITTSProvider using variant 'gesserit' with default voice: en_us_rocket
+2025-09-02 21:20:02,471 - voice.text_to_speech.providers.tiktok_tts - INFO - Initialized tiktokAPITTSProvider using variant 'gesserit' with default voice: en_us_rocket
