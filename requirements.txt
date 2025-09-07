@@ -1,20 +1,22 @@
-# Core App & Brain
+# Core Web App & Brain
+flask
+twilio
 openai
-pydub
-sounddevice
-soundfile
-numpy
-
-# TTS-Engine Dependencies
 requests
-pygame
+python-dotenv
+
+# TTS-Engine Dependencies (Web Compatible)
 aiohttp
 aiofiles
-python-dotenv
 edge-tts
 
-# VibeVoice & STT Dependencies
-vosk
-git+https://github.com/openai/whisper.git
-pvleopard
-pvporcupine
+# Optional Desktop Dependencies (not needed for Vercel)
+# pydub
+# sounddevice  
+# soundfile
+# numpy
+# pygame
+# vosk
+# git+https://github.com/openai/whisper.git
+# pvleopard
+# pvporcupine
