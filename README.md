@@ -35,14 +35,31 @@ It's simple, powerful, and ready to scale:
 ---
 ## 🚀 Get Started – It's Easier Than You Think!
 
-Ready to launch your own AI co-pilot? Follow these steps:
+Ready to launch your own AI co-pilot? You have two options:
+
+### 🌐 Web Deployment (Recommended for Phone Integration)
+
+Deploy to Vercel for 24/7 phone-based AI conversations:
+
+```bash
+# Quick deploy to Vercel
+git clone --recurse-submodules https://github.com/sankalp-v1/Aura-Voice.git
+cd Aura-Voice
+vercel
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions with Twilio integration.
+
+### 🖥️ Desktop Application (Voice Assistant)
+
+For local wake-word detection and desktop interaction:
 
 ### 1. Clone the Repo (and all its cool bits)
 Grab this project, including our custom `TTS-Engine` submodule:
 ```sh
-git clone --recurse-submodules [YOUR_REPO_URL_HERE]
+git clone --recurse-submodules https://github.com/sankalp-v1/Aura-Voice.git
 cd Aura-Voice
-````
+```
 
 ### 2\. Install the Essentials
 
@@ -52,31 +69,32 @@ First, let's get those system-level heroes and Python power-ups:
 sudo apt-get update && sudo apt-get install -y portaudio19-dev ffmpeg
 ```
 
-Then, all the Python packages you'll need:
+Then, install the desktop dependencies:
 
 ```sh
 pip install -r TTS-Engine/requirements.txt
-pip install twilio flask openai
+pip install pydub sounddevice soundfile numpy pygame vosk pvleopard pvporcupine
 ```
 
 ### 3\. Secure Your Keys 🔑
 
-Keep your secrets safe\! Store these in your GitHub Codespaces Secrets (the 🔒 icon):
+Keep your secrets safe\! Set these environment variables:
 
   * `GITHUB_TOKEN`: Your Personal Access Token for the GitHub AI Brain.
-  * `TWILIO_ACCOUNT_SID`: Your Account SID from your Twilio dashboard.
-  * `TWILIO_AUTH_TOKEN`: Your Auth Token from your Twilio dashboard.
+  * `PICOVOICE_ACCESS_KEY`: For wake word detection (get from Picovoice Console).
 
-### 4\. Plug into Twilio 🌐
+### 3\. Run the Desktop Application 🖥️
 
-1.  **Get a Phone Number:** Snag a trial phone number from your Twilio dashboard.
-2.  **Fire Up the Server:** Get your Aura-Voice server running locally: `python server.py`.
-3.  **Grab the Public URL:** In your Codespaces **PORTS** tab, find and copy the public URL for **port 5000**.
-4.  **Configure the Webhook:** On your Twilio number's config page (under "Voice & Fax"), set **"A CALL COMES IN"** to `Webhook`. Paste your public URL (ending with `/voice`), and set the method to `HTTP POST`.
+```sh
+python desktop_app.py
+```
 
-### 5\. Dial and Vibe with Your AI\! 📞👾
+Say "Jarvis" to wake up the assistant, then speak your command!
 
-Call your shiny new Twilio number from your real phone\! Your `server.py` script will answer, and you'll be chatting with your very own AI co-pilot. Experience the future\!
+---
+## 📱 Phone Integration with Vercel + Twilio
+
+For 24/7 phone-based AI conversations, see [DEPLOYMENT.md](DEPLOYMENT.md) for complete Vercel deployment instructions.
 
 ---
 ## Setup (recommended)
